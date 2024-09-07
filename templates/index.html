@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .payment-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .payment-method {
+            margin-bottom: 20px;
+        }
+        .payment-method label {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .payment-method input[type="radio"] {
+            margin-right: 10px;
+        }
+        .card-details, .upi-details {
+            display: none;
+            margin-top: 10px;
+        }
+        .active {
+            display: block;
+        }
+        .upi-apps {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        .upi-apps img {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+        .upi-apps img.active {
+            opacity: 1;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+        }
+        .pay-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .pay-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <h1>Select Payment Method</h1>
+        <div class="payment-method">
+            <label>
+                <input type="radio" name="payment-method" value="card"> Card Payment
+            </label>
+            <label>
+                <input type="radio" name="payment-method" value="upi"> UPI Payment
+            </label>
+        </div>
+
+        <div class="card-details">
+            <input type="text" placeholder="Card Number" required>
+            <input type="text" placeholder="Card Holder Name" required>
+            <input type="text" placeholder="Expiry Date" required>
+            <input type="text" placeholder="CVV" required>
+        </div>
+
+        <div class="upi-details">
+            <div class="upi-apps">
+                <!-- Updated paths to your static files -->
+                <img src="{{ url_for('static', filename='gpay.png') }}" id="gpay" alt="GPay">
+                <img src="{{ url_for('static', filename='phonepe.png') }}" id="phonepe" alt="PhonePe">
+                <img src="{{ url_for('static', filename='paytm.png') }}" id="paytm" alt="Paytm">
+            </div>
+            <input type="text" id="upi-id" placeholder="Enter UPI ID" required>
+        </div>
+
+        <button class="pay-button">Pay</button>
+    </div>
+
+    <script>
+        document.querySelectorAll('input[name="payment-method"]').forEach(input => {
+            input.addEventListener('change', function () {
+                document.querySelector('.card-details').classList.remove('active');
+                document.querySelector('.upi-details').classList.remove('active');
+                if (this.value === 'card') {
+                    document.querySelector('.card-details').classList.add('active');
+                } else if (this.value === 'upi') {
+                    document.querySelector('.upi-details').classList.add('active');
+                }
+            });
+        });
+
+        const upiApps = document.querySelectorAll('.upi-apps img');
+        let selectedUpiApp = '';
+
+        upiApps.forEach(app => {
+            app.addEventListener('click', function () {
+                upiApps.forEach(app => app.classList.remove('active'));
+                this.classList.add('active');
+                selectedUpiApp = this.id;
+            });
+        });
+
+        document.querySelector('.pay-button').addEventListener('click', function () {
+            const selectedPaymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            if (selectedPaymentMethod === 'card') {
+                alert('Payment Successful!'); // This can be replaced with actual logic for card payment success
+            } else if (selectedPaymentMethod === 'upi') {
+                if (!selectedUpiApp) {
+                    alert('Please select a UPI app.');
+                    return;
+                }
+                const upiId = document.getElementById('upi-id').value;
+                if (!upiId) {
+                    alert('Please enter your UPI ID.');
+                    return;
+                }
+                window.location.href = `/redirect?upiApp=${selectedUpiApp}&upiId=${upiId}`;
+            }
+        });
+    </script>
+</body>
+</html>
